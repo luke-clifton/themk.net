@@ -10,12 +10,12 @@ For embedded systems, we would tend to want system sessions,
 as we are usually looking at global events.
 
 D-Bus has the concept of an address on the bus. This has to be a unique
-name. It is usualy a reverse DNS to ensure uniqueness.
+name. It is usually a reverse DNS to ensure uniqueness.
 
     com.example.xyz
 
 A single program can register such an address with the bus. It can then
-register objects in a hierachy at that address. Each object must be contained
+register objects in a hierarchy at that address. Each object must be contained
 within (or actually be) the root object designated by `/`. Essentially
 this means object names have to start with a `/`.
 
@@ -32,7 +32,7 @@ These interfaces can define a set of methods. e.g.
     GetInfo()
     GetReading()
 
-Which are usualy refered to prefixed with their interface name
+Which are usually referred to prefixed with their interface name
 
     com.example.xyz.manager.GetInfo
     com.example.xyz.sensor.GetReading

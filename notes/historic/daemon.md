@@ -12,13 +12,11 @@ daemony things, but you can cheat a lot by using a program called
 Simply write a regular program and make an init.d script that starts it
 and stops it like this
 
-to start use 
-
     start-stop-daemon --start --exec python \
         --startas /home/root/sampler/sampler.py \
         --make-pid --pidfile /path/to/sampler.pid -b
 
-the `--start` tells it to start it, the `--exec` option says that the prgram
+The `--start` tells it to start it, the `--exec` option says that the program
 that is started will be an instance of python (to find out what you should
 put here, start your program normally, determine its PID (with `ps`) and
 do an
@@ -35,7 +33,7 @@ To stop use
 
     start-stop-daemon --stop --exec python --pidfile /path/to/sampler.pid
 
-This process will ensure that only a single instance of your prgram is running
+This process will ensure that only a single instance of your program is running
 at any given time (it uses the PID file and the value of `--exec` to know
 whether or not your program is running).
 

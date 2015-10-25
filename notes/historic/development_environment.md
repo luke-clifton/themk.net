@@ -2,7 +2,7 @@
 title: ARM Development Environment
 ---
 
-> I would *NOT* recommend this aproach to cross-compilation.
+> I would *NOT* recommend this approach to cross-compilation.
 > It can cause serious pain and madness, as well as a sudden
 > and irretrievable loss of time.
 >
@@ -24,9 +24,9 @@ us to use a native cross-compiling gcc to provide speed. The fake
 chroot lets the executables think that they exist within a contained
 environment.
 
-The reason why we do not simply compile all software on the Bungarra,
+The reason why we do not simply compile all software on the ARM device,
 or a fully blown ARM virtualised system, is that these environments
-underperform, or run out of system resources. The reason that our new
+under-perform, or run out of system resources. The reason that our new
 system does not suffer from this is that we can compile certain often
 used programs natively, and get the full performance required.
 
@@ -36,7 +36,7 @@ used programs natively, and get the full performance required.
 Use your systems package manager to install qemu-user, bsdtar, proot,
 and arm-linux-gnueabi-gcc
 
-(debian/ubuntu users, there is a seperate repository that you need
+(debian/ubuntu users, there is a separate repository that you need
  to enable to get proot)
 
     # apt-get install gcc-arm-linux-gnueabi qemu-user proot bsdtar
@@ -81,7 +81,7 @@ https://wiki.archlinux.org/index.php/Pacbuilder
 ### I need root access, but sudo does not work
 
 The sudo program requires that various permission bits and ownerships
-are set in a particular way. Because this is an unpriviledged setup,
+are set in a particular way. Because this is an unprivileged setup,
 these bits are all wrong. If you need to get root access to the system
 use
 

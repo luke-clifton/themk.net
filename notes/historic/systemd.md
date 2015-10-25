@@ -2,7 +2,7 @@
 title: systemd
 ---
 
-Systemd is a replacement for the old init script. This is the
+Systemd is a replacement for the traditional init scripts. This is the
 program that is launched when linux boots, and is the parent of
 all other processes.
 

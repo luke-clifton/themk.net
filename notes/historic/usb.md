@@ -46,12 +46,12 @@ You can make udev rerun all its rules with this
     udevadm trigger
 
 For SECRET_PROJECT_E I have added an init.d script that runs really late in the
-boot process and simlpy calls that. Ideally we should make udev start
+boot process and simply calls that. Ideally we should make udev start
 earlier. I don't know how to do this yet.
 
 ## My USB device is frozen?!
 
-Each usb device should have a entry in lsusb. Look for the fields that
+Each usb device should have a entry in `lsusb`. Look for the fields that
 look like
 
     1d6b:0002

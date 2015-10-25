@@ -7,7 +7,7 @@ A different system found in many distributions these days is `systemd`.
 `init.d` is what is used to start and stop daemons and to also run scripts
 at boot time.
 
-scripts in `init.d` take a single argument. This argument can be one of
+Scripts in `init.d` take a single argument. This argument can be one of
 `{start|stop|restart|status}` or a few others. The only ones you need
 to implement really are `start` and `stop` (and restart, which is trivial).
 
@@ -38,8 +38,8 @@ Two reasons common.
         update-rc.d my_script defaults
     
    to install the daemon at all the default run-levels (run levels are
-   different modes of booting linux, you can see which run level you are
-   currently booted with `runlevel'). It will also install the proper
+   different modes of booting Linux, you can see which run level you are
+   currently booted with `runlevel`). It will also install the proper
    scripts to stop the daemon during shutdown (eg it will call
 
         /etc/init.d/my_script stop
@@ -51,13 +51,13 @@ Two reasons common.
 #!/bin/sh
 
 # Human readable name
-NAME="EcoCentric Sampler"
+NAME="Service Name"
 
 # Where to store the pid file
-PIDFILE=/home/root/sampler.pid
+PIDFILE=/path/to/service.pid
 
 # Name of the program to launch
-PROGRAM=/home/root/sampler/sampler.py
+PROGRAM=/path/to/service.py
 
 # exec argument to start-stop-daemon
 EXEC=python
