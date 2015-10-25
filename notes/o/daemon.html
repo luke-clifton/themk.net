@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <meta name="generator" content="pandoc">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+  <title></title>
+  <style type="text/css">code{white-space: pre;}</style>
+  <!--[if lt IE 9]>
+    <script src="http://html5shim.googlecode.com/svn/trunk/html5.js"></script>
+  <![endif]-->
+  <link rel="stylesheet" href="pandoc.css">
+</head>
+<body>
+<section id="daemons-in-in-init" class="level1">
+<h1>Daemons in in <code>init</code></h1>
+<blockquote>
+<p>See systemd note for details on how to do this with systemd</p>
+</blockquote>
+<p>A proper daemon would do a lot of work to make sure that it is the only one running, to make sure that it forks and does all the proper daemony things, but you can cheat a lot by using a program called <code>start-stop-daemon</code>.</p>
+<p>Simply write a regular program and make an init.d script that starts it and stops it like this</p>
+<p>to start use</p>
+<pre><code>start-stop-daemon --start --exec python \
+    --startas /home/root/sampler/sampler.py \
+    --make-pid --pidfile /path/to/sampler.pid -b</code></pre>
+<p>the <code>--start</code> tells it to start it, the <code>--exec</code> option says that the prgram that is started will be an instance of python (to find out what you should put here, start your program normally, determine its PID (with <code>ps</code>) and do an</p>
+<pre><code>ls -l /proc/&lt;pid&gt;/exe</code></pre>
+<p>This will show you what is really being run (e.g. <code>/usr/bin/python</code>)) The <code>--startas</code> options tells it which command to run to start the process. <code>--make-pid</code> tells it to make a pid-file which it will use later on to see if the process is still running. <code>--pidfile</code> tells it where to put the pidfile and <code>-b</code> tells it to &quot;background&quot; the task.</p>
+<p>To stop use</p>
+<pre><code>start-stop-daemon --stop --exec python --pidfile /path/to/sampler.pid</code></pre>
+<p>This process will ensure that only a single instance of your prgram is running at any given time (it uses the PID file and the value of <code>--exec</code> to know whether or not your program is running).</p>
+<p>Have a look at the example <code>init.d</code> script that launches a python script as a daemon</p>
+</section>
+</body>
+</html>

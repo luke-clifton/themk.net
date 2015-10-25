@@ -1,0 +1,25 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <meta name="generator" content="pandoc">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+  <title></title>
+  <style type="text/css">code{white-space: pre;}</style>
+  <!--[if lt IE 9]>
+    <script src="http://html5shim.googlecode.com/svn/trunk/html5.js"></script>
+  <![endif]-->
+  <link rel="stylesheet" href="pandoc.css">
+</head>
+<body>
+<section id="hmac-for-authenticating-messages" class="level1">
+<h1>HMAC for authenticating messages</h1>
+<p>Another is to use a HMAC. HMAC means that both the server and the unit need to know the key.</p>
+<pre><code>{
+    &quot;msg&quot; = &quot;something that can be seen&quot;,
+    &quot;sig&quot; = &quot;dasjj2hJH1bsja197AHbeb&quot;
+}</code></pre>
+<p>Where sig is generated with a SHA5 HMAC of the &quot;msg&quot; field using a known shared key.</p>
+</section>
+</body>
+</html>

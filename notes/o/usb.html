@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <meta name="generator" content="pandoc">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+  <title></title>
+  <style type="text/css">code{white-space: pre;}</style>
+  <!--[if lt IE 9]>
+    <script src="http://html5shim.googlecode.com/svn/trunk/html5.js"></script>
+  <![endif]-->
+  <link rel="stylesheet" href="pandoc.css">
+</head>
+<body>
+<section id="usb" class="level1">
+<h1>USB</h1>
+<section id="which-device-am-i-using" class="level2">
+<h2>Which device am I using?</h2>
+<p>Use udev rules to SYMLINK a device based on its USB parameters. Usually link to <code>/dev/modem</code> or <code>/dev/angle_encoder</code> etc.</p>
+<p>Rules can be based on anything in</p>
+<pre><code>udevadm info -a -n ttyUSB1</code></pre>
+<p>with the only rule being you can only look at the values from the main device and a single (any) parent.</p>
+<p>Rules are written into <code>/etc/udev/rules.d/10-local.rules</code> The 10 makes it more important than the default rules (which I think have a priority of 50). The <code>.rules</code> ending is required.</p>
+<p>For example, to get the Sierra module working, and always mounting the modem port at <code>/dev/modem</code> I used the rules</p>
+<pre><code>DRIVERS==&quot;sierra&quot;, ATTRS{bInterfaceNumber}==&quot;02&quot;, SYMLINK+=&quot;modem&quot;</code></pre>
+<p>The Sierra module brings up 4 interfaces (which can bee seen in <code>dmesg</code>) and you had to guess and check to figure out which interface number the correct one corresponded to. Once you knew which <code>/dev/ttyUSB*</code> corresponded to the modems communication channel you had to do a</p>
+<pre><code>udevadm info -a -n ttyUSB1
+udevadm info -a -n ttyUSB2
+udevadm info -a -n ttyUSB3
+udevadm info -a -n ttyUSB4</code></pre>
+<p>and check the differences.</p>
+<p>Once the rules are established any device plugging/unplugging should see those rules. But do see the next section.</p>
+</section>
+<section id="my-udev-rules-dont-work-on-boot" class="level2">
+<h2>My udev rules don't work on boot!</h2>
+<p>Currently udev starts AFTER the devices have been registered by the kernel. You can make udev rerun all its rules with this</p>
+<pre><code>udevadm trigger</code></pre>
+<p>For SECRET_PROJECT_E I have added an init.d script that runs really late in the boot process and simlpy calls that. Ideally we should make udev start earlier. I don't know how to do this yet.</p>
+</section>
+<section id="my-usb-device-is-frozen" class="level2">
+<h2>My USB device is frozen?!</h2>
+<p>Each usb device should have a entry in lsusb. Look for the fields that look like</p>
+<pre><code>1d6b:0002
+0458:0007
+0403:6001</code></pre>
+<p>The first number is the vendor id, the second is the product id.</p>
+<p>You can restart a usb device by using usb_modeswitch</p>
+<pre><code>usb_modeswitch -R -v &lt;vendor_id&gt; -p &lt;product_id&gt;</code></pre>
+<p>I don't know if you can distinguish between multiple identical products that are plugged in.</p>
+</section>
+</section>
+</body>
+</html>

@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <meta name="generator" content="pandoc">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+  <title></title>
+  <style type="text/css">code{white-space: pre;}</style>
+  <!--[if lt IE 9]>
+    <script src="http://html5shim.googlecode.com/svn/trunk/html5.js"></script>
+  <![endif]-->
+  <link rel="stylesheet" href="pandoc.css">
+</head>
+<body>
+<section id="systemd" class="level1">
+<h1>systemd</h1>
+<p>Systemd is a replacement for the old init script. This is the program that is launched when linux boots, and is the parent of all other processes.</p>
+<p>Systemd using the Linux kernel feature control groups (or <code>CGROUPS</code>) to keep track of processes. This allows it to know when a program has stopped, and it can then be restarted. This is more robust then keeping and checking PID files or using <code>daemon-start-stop</code>. It is, however, not portable.</p>
+<section id="systemd-services" class="level2">
+<h2><code>systemd</code> Services</h2>
+<p>A <code>systemd</code> service is defined in a <code>.service</code> file. These files live in <code>/usr/lib/systemd/system</code> or <code>/usr/lib/systemd/user</code>.</p>
+<p>Important properties for the <code>.service</code> files for us are in the <code>[Service]</code> section</p>
+<pre><code>Restart=always
+BusName=name
+StartExec=/usr/bin/my_program
+Type=simple</code></pre>
+<p>and in the <code>[Install]</code> section it is often useful to define an alias</p>
+<pre><code>Alias=dbus-com.example.xyz.service</code></pre>
+<p>The name of the service is taken from the file name.</p>
+<p>To start, stop and restart a service</p>
+<pre><code># systemctl start my_prog.service
+# systemctl stop my_prog.service
+# systemctl restart my_prog.service</code></pre>
+<p>To get the status of a service</p>
+<pre><code>$ systemctl status my_prog.service</code></pre>
+<pre><code>$ systemctl status annoy.service
+annoy.service
+   Loaded: loaded (/usr/lib/systemd/system/annoy.service; enabled)
+   Active: active (running) since Mon 2013-10-21 13:50:02 WST; 48min ago
+ Main PID: 19607 (python2)
+   CGroup: /system.slice/annoy.service
+           └─19607 python2 /home/lukec/test/pd/server.py
+
+Oct 21 13:50:02 bardeen systemd[1]: Starting annoy.service...
+Oct 21 13:50:02 bardeen systemd[1]: Started annoy.service.
+</code></pre>
+<p>and to enable or disable a service from starting automatically at boot or being activated by <code>systemd</code> in other ways (such as DBus activation or socket activations</p>
+<pre><code># systemctl enable my_prog.service
+# ssytemctl disable my_prog.service</code></pre>
+<p>To take a look at the log file for a particular service do</p>
+<pre><code>journalctl -u example.service</code></pre>
+<p>Or if you are on a really old system</p>
+<pre><code>journalctl _SYSTEMD_UNIT=example.service</code></pre>
+</section>
+</section>
+</body>
+</html>

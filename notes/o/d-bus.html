@@ -1,0 +1,251 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <meta name="generator" content="pandoc">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+  <title></title>
+  <style type="text/css">code{white-space: pre;}</style>
+  <!--[if lt IE 9]>
+    <script src="http://html5shim.googlecode.com/svn/trunk/html5.js"></script>
+  <![endif]-->
+  <style type="text/css">
+div.sourceCode { overflow-x: auto; }
+table.sourceCode, tr.sourceCode, td.lineNumbers, td.sourceCode {
+  margin: 0; padding: 0; vertical-align: baseline; border: none; }
+table.sourceCode { width: 100%; line-height: 100%; }
+td.lineNumbers { text-align: right; padding-right: 4px; padding-left: 4px; color: #aaaaaa; border-right: 1px solid #aaaaaa; }
+td.sourceCode { padding-left: 5px; }
+code > span.kw { color: #007020; font-weight: bold; } /* Keyword */
+code > span.dt { color: #902000; } /* DataType */
+code > span.dv { color: #40a070; } /* DecVal */
+code > span.bn { color: #40a070; } /* BaseN */
+code > span.fl { color: #40a070; } /* Float */
+code > span.ch { color: #4070a0; } /* Char */
+code > span.st { color: #4070a0; } /* String */
+code > span.co { color: #60a0b0; font-style: italic; } /* Comment */
+code > span.ot { color: #007020; } /* Other */
+code > span.al { color: #ff0000; font-weight: bold; } /* Alert */
+code > span.fu { color: #06287e; } /* Function */
+code > span.er { color: #ff0000; font-weight: bold; } /* Error */
+code > span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warning */
+code > span.cn { color: #880000; } /* Constant */
+code > span.sc { color: #4070a0; } /* SpecialChar */
+code > span.vs { color: #4070a0; } /* VerbatimString */
+code > span.ss { color: #bb6688; } /* SpecialString */
+code > span.im { } /* Import */
+code > span.va { color: #19177c; } /* Variable */
+code > span.cf { color: #007020; font-weight: bold; } /* ControlFlow */
+code > span.op { color: #666666; } /* Operator */
+code > span.bu { } /* BuiltIn */
+code > span.ex { } /* Extension */
+code > span.pp { color: #bc7a00; } /* Preprocessor */
+code > span.at { color: #7d9029; } /* Attribute */
+code > span.do { color: #ba2121; font-style: italic; } /* Documentation */
+code > span.an { color: #60a0b0; font-weight: bold; font-style: italic; } /* Annotation */
+code > span.cv { color: #60a0b0; font-weight: bold; font-style: italic; } /* CommentVar */
+code > span.in { color: #60a0b0; font-weight: bold; font-style: italic; } /* Information */
+  </style>
+  <link rel="stylesheet" href="pandoc.css">
+</head>
+<body>
+<section id="d-bus-overview" class="level1">
+<h1>D-Bus Overview</h1>
+<p>The D-Bus daemon has multiple instances, specifically a session and system instance. The system instance is for all things at all times, while the session instance is for login sessions.</p>
+<p>We, for embedded systems, I think would tend to want system sessions, as we are usually looking at global events.</p>
+<p>D-Bus has the concept of an address on the bus. This has to be a unique name. It is usualy a reverse DNS to ensure uniqueness.</p>
+<pre><code>com.example.xyz</code></pre>
+<p>A single program can register such an address with the bus. It can then register objects in a hierachy at that address. Each object must be contained within (or actually be) the root object designated by <code>/</code>. Essentially this means object names have to start with a <code>/</code>.</p>
+<pre><code>/com/example/xyz/manager
+/com/example/xyz/sensor/yy</code></pre>
+<p>Each of these objects can implement an interface</p>
+<pre><code>com.example.xyz.manager
+com.example.xyz.sensor</code></pre>
+<p>These interfaces can define a set of methods. e.g.</p>
+<pre><code>GetInfo()
+GetReading()</code></pre>
+<p>Which are usualy refered to prefixed with their interface name</p>
+<pre><code>com.example.xyz.manager.GetInfo
+com.example.xyz.sensor.GetReading</code></pre>
+<p>When calling a method (which is done by sending a message) you need to supply the destination (<code>com.example.xyz</code>), the Object name (<code>/com/example/xyz/manager</code>) and the complete method name (including the interface) (<code>com.example.xyz.manager.GetInfo</code>).</p>
+<p>What follows is an example of using the command line tool <code>dbus-send</code> to call a method</p>
+<pre><code>dbus-send --print-reply --system --dest=com.example.xyz \
+  /com/example/xyz/manager com.example.xyz.manager.GetInfo</code></pre>
+<p>or</p>
+<pre><code>dbus-send --print-reply --system --dest=com.example.xyz \
+  /com/example/xyz/sensor/yy com.example.xyz.sensor.GetReading</code></pre>
+<p>Many binding let you create a proxy object.</p>
+<section id="client" class="level4">
+<h4>Client</h4>
+<div class="sourceCode"><pre class="sourceCode python"><code class="sourceCode python"><span class="im">import</span> dbus
+
+<span class="co"># Get the system bus</span>
+bus <span class="op">=</span> dbus.SystemBus()    <span class="co"># as opposed to SessionBus()</span>
+
+<span class="co"># Find on that bus, at the address &#39;com.example.xyz&#39; the</span>
+<span class="co"># object &#39;/com/example/xyz/manager&#39;</span>
+
+obj <span class="op">=</span> bus.get_object(<span class="st">&#39;com.example.xyz&#39;</span>, <span class="st">&#39;/com/example/xyz/manager&#39;</span>)
+<span class="co"># And then get the particular interface of that object</span>
+interface <span class="op">=</span> dbus.Interface(obj, <span class="st">&#39;com.example.xyz.manager&#39;</span>)
+
+<span class="bu">print</span> interface.GetInfo()
+interface.SetInfo(<span class="st">&quot;Huzzah! D-Bus!&quot;</span>)
+<span class="bu">print</span> interface.GetInfo()</code></pre></div>
+</section>
+<section id="server" class="level4">
+<h4>Server</h4>
+<div class="sourceCode"><pre class="sourceCode python"><code class="sourceCode python"><span class="im">import</span> dbus
+<span class="im">import</span> dbus.service
+<span class="im">import</span> gobject
+
+<span class="co"># Most binding use either glib (gtk) or qt or ev for the event loop</span>
+<span class="im">from</span> dbus.mainloop.glib <span class="im">import</span> DBusGMainLoop
+
+<span class="kw">class</span> MyUsefulDbusClass(dbus.service.Object):
+    <span class="kw">def</span> <span class="fu">__init__</span>(<span class="va">self</span>):
+        <span class="va">self</span>.info <span class="op">=</span> <span class="st">&quot;Some Info&quot;</span>
+
+        <span class="co"># Inconsistent terminology here. BusName does not refer to the bus (as in</span>
+        <span class="co"># session vs system), but to the address on the bus. So this is registering</span>
+        <span class="co"># a new address on the System bus.</span>
+        bus_name <span class="op">=</span> dbus.service.BusName(<span class="st">&#39;com.example.xyz&#39;</span>, bus <span class="op">=</span> dbus.SystemBus())
+
+        <span class="co"># And this is registering an object</span>
+        dbus.service.Object.<span class="fu">__init__</span>(<span class="va">self</span>, bus_name, <span class="st">&#39;/com/example/xyz/manager&#39;</span>)
+
+    <span class="co"># This decorator is used to say that this object implements</span>
+    <span class="co"># the com.example.xyz.manager interface, and that interface</span>
+    <span class="co"># has a function named GetInfo</span>
+    <span class="at">@dbus.service.method</span>(<span class="st">&#39;com.example.xyz.manger&#39;</span>) <span class="co"># (3)</span>
+    <span class="kw">def</span> GetInfo():
+        <span class="cf">return</span> <span class="va">self</span>.info
+
+    <span class="at">@dbus.service.method</span>(<span class="st">&#39;com.example.xyz.manager&#39;</span>)
+    <span class="kw">def</span> SetInfo(new_info):
+        <span class="va">self</span>.info <span class="op">=</span> new_info
+
+DBusGMainLoop(set_as_default<span class="op">=</span><span class="va">True</span>)
+
+service <span class="op">=</span> MyUsefulDbusClass()
+
+loop <span class="op">=</span> gobject.MainLoop()
+loop.run()</code></pre></div>
+<p>But wait... you still won't be able to use this.. D-Bus has a security mechanism so that not anyone can just go and put any old service up.</p>
+</section>
+<section id="security" class="level2">
+<h2>Security</h2>
+<p>The d-bus system relies heavily on commonly known names to provide services to other applications, so anyone who can register a service could take one of these names and other programs on the bus would not know. In order to allow yourself to do stuff on the bus take a look at <code>/etc/dbus-1/system.d/</code>. All the files in here specify who is allowed to do what.</p>
+<p>The basic idea is that you set a policy for a certain set of users, and then you set up <code>&lt;deny&gt;</code> and <code>&lt;allow&gt;</code> blocks which match against a bunch of rules. All of the rules inside a particular <code>&lt;deny&gt;</code> or <code>&lt;allow&gt;</code> block need to match. The rules are attributes of the tags.</p>
+<div class="sourceCode" id="policy"><pre class="sourceCode xml"><code class="sourceCode xml"><span class="kw">&lt;policy</span><span class="ot"> user=</span><span class="st">&quot;root&quot;</span><span class="kw">&gt;</span>
+    <span class="co">&lt;!-- Policy definition for root user--&gt;</span>
+    <span class="kw">&lt;allow</span><span class="ot"> rule1=</span><span class="st">&quot;blah&quot;</span><span class="ot"> rule2=</span><span class="st">&quot;blahblah&quot;</span><span class="kw">/&gt;</span>
+    <span class="kw">&lt;allow</span><span class="ot"> own=</span><span class="st">&quot;com.example.xyz&quot;</span><span class="kw">/&gt;</span> <span class="co">&lt;!-- Allows root to own this address --&gt;</span>
+    <span class="co">&lt;!-- Allow root to send messages to this address and interface combination --&gt;</span>
+    <span class="kw">&lt;allow</span><span class="ot"> send_destination=</span><span class="st">&quot;com.example.xyz&quot;</span>
+<span class="ot">           send_interface=</span><span class="st">&quot;com.example.xyz.manager&quot;</span><span class="kw">&gt;</span>
+<span class="kw">&lt;/policy&gt;</span></code></pre></div>
+<p>What follows is the default security policy. You need to punch holes in it to allow your service to be used and registered.</p>
+<div class="sourceCode" id="policy_default"><pre class="sourceCode xml"><code class="sourceCode xml"><span class="kw">&lt;policy</span><span class="ot"> context=</span><span class="st">&quot;default&quot;</span><span class="kw">&gt;</span>
+  <span class="co">&lt;!-- All users can connect to system bus --&gt;</span>
+  <span class="kw">&lt;allow</span><span class="ot"> user=</span><span class="st">&quot;*&quot;</span><span class="kw">/&gt;</span>
+
+  <span class="co">&lt;!-- Holes must be punched in service configuration files for</span>
+<span class="co">       name ownership and sending method calls --&gt;</span>
+  <span class="kw">&lt;deny</span><span class="ot"> own=</span><span class="st">&quot;*&quot;</span><span class="kw">/&gt;</span>
+  <span class="kw">&lt;deny</span><span class="ot"> send_type=</span><span class="st">&quot;method_call&quot;</span><span class="kw">/&gt;</span>
+
+  <span class="co">&lt;!-- Signals and reply messages (method returns, errors) are allowed</span>
+<span class="co">       by default --&gt;</span>
+  <span class="kw">&lt;allow</span><span class="ot"> send_type=</span><span class="st">&quot;signal&quot;</span><span class="kw">/&gt;</span>
+  <span class="kw">&lt;allow</span><span class="ot"> send_requested_reply=</span><span class="st">&quot;true&quot;</span><span class="ot"> send_type=</span><span class="st">&quot;method_return&quot;</span><span class="kw">/&gt;</span>
+  <span class="kw">&lt;allow</span><span class="ot"> send_requested_reply=</span><span class="st">&quot;true&quot;</span><span class="ot"> send_type=</span><span class="st">&quot;error&quot;</span><span class="kw">/&gt;</span>
+
+  <span class="co">&lt;!-- All messages may be received by default --&gt;</span>
+  <span class="kw">&lt;allow</span><span class="ot"> receive_type=</span><span class="st">&quot;method_call&quot;</span><span class="kw">/&gt;</span>
+  <span class="kw">&lt;allow</span><span class="ot"> receive_type=</span><span class="st">&quot;method_return&quot;</span><span class="kw">/&gt;</span>
+  <span class="kw">&lt;allow</span><span class="ot"> receive_type=</span><span class="st">&quot;error&quot;</span><span class="kw">/&gt;</span>
+  <span class="kw">&lt;allow</span><span class="ot"> receive_type=</span><span class="st">&quot;signal&quot;</span><span class="kw">/&gt;</span>
+
+  <span class="co">&lt;!-- Allow anyone to talk to the message bus --&gt;</span>
+  <span class="kw">&lt;allow</span><span class="ot"> send_destination=</span><span class="st">&quot;org.freedesktop.DBus&quot;</span><span class="kw">/&gt;</span>
+  <span class="co">&lt;!-- But disallow some specific bus services --&gt;</span>
+  <span class="kw">&lt;deny</span><span class="ot"> send_destination=</span><span class="st">&quot;org.freedesktop.DBus&quot;</span>
+<span class="ot">        send_interface=</span><span class="st">&quot;org.freedesktop.DBus&quot;</span>
+<span class="ot">        send_member=</span><span class="st">&quot;UpdateActivationEnvironment&quot;</span><span class="kw">/&gt;</span>
+<span class="kw">&lt;/policy&gt;</span></code></pre></div>
+<section id="example-policy-configurations" class="level4">
+<h4>Example policy configurations</h4>
+<div class="sourceCode"><pre class="sourceCode xml"><code class="sourceCode xml"><span class="kw">&lt;?xml</span> version=&quot;1.0&quot;<span class="kw">?&gt;</span> <span class="co">&lt;!--*-nxml-*--&gt;</span>
+<span class="dt">&lt;!DOCTYPE </span>busconfig PUBLIC &quot;-//freedesktop//DTD D-BUS Bus Configuration 1.0//EN&quot;
+&quot;http://www.freedesktop.org/standards/dbus/1.0/busconfig.dtd&quot;<span class="dt">&gt;</span>
+
+<span class="co">&lt;!-- Policy to allow root to start the service, and anyone to use ALL</span>
+<span class="co">     the methods in it. --&gt;</span>
+<span class="kw">&lt;busconfig&gt;</span>
+
+    <span class="kw">&lt;policy</span><span class="ot"> user=</span><span class="st">&quot;root&quot;</span><span class="kw">&gt;</span>
+        <span class="kw">&lt;allow</span><span class="ot"> own=</span><span class="st">&quot;com.example.xyz&quot;</span><span class="kw">/&gt;</span>
+    <span class="kw">&lt;/policy&gt;</span>
+
+    <span class="kw">&lt;policy</span><span class="ot"> context=</span><span class="st">&quot;default&quot;</span><span class="kw">&gt;</span>
+        <span class="kw">&lt;allow</span><span class="ot"> send_interface=</span><span class="st">&quot;com.example.xyz.manager&quot;</span>
+<span class="ot">               send_destination=</span><span class="st">&quot;com.example.xyz&quot;</span><span class="kw">/&gt;</span>
+        <span class="kw">&lt;allow</span><span class="ot"> send_interface=</span><span class="st">&quot;org.freedesktop.DBus.Introspectable&quot;</span>
+<span class="ot">               send_destination=</span><span class="st">&quot;com.example.xyz&quot;</span><span class="kw">/&gt;</span>
+    <span class="kw">&lt;/policy&gt;</span>
+
+<span class="kw">&lt;/busconfig&gt;</span></code></pre></div>
+<div class="sourceCode"><pre class="sourceCode xml"><code class="sourceCode xml"><span class="kw">&lt;?xml</span> version=&quot;1.0&quot;<span class="kw">?&gt;</span> <span class="co">&lt;!--*-nxml-*--&gt;</span>
+<span class="dt">&lt;!DOCTYPE </span>busconfig PUBLIC &quot;-//freedesktop//DTD D-BUS Bus Configuration 1.0//EN&quot;
+&quot;http://www.freedesktop.org/standards/dbus/1.0/busconfig.dtd&quot;<span class="dt">&gt;</span>
+
+<span class="co">&lt;!-- Policy that only allows root to start a server and run methods --&gt;</span>
+<span class="kw">&lt;busconfig&gt;</span>
+
+    <span class="kw">&lt;policy</span><span class="ot"> user=</span><span class="st">&quot;root&quot;</span><span class="kw">&gt;</span>
+        <span class="kw">&lt;allow</span><span class="ot"> own=</span><span class="st">&quot;com.example.xyz&quot;</span><span class="kw">/&gt;</span>
+        <span class="kw">&lt;allow</span><span class="ot"> send_interface=</span><span class="st">&quot;com.example.xyz.manager&quot;</span>
+<span class="ot">               send_destination=</span><span class="st">&quot;com.example.xyz&quot;</span><span class="kw">/&gt;</span>
+        <span class="kw">&lt;allow</span><span class="ot"> send_interface=</span><span class="st">&quot;org.freedesktop.DBus.Introspectable&quot;</span>
+<span class="ot">               send_destination=</span><span class="st">&quot;com.example.xyz&quot;</span><span class="kw">/&gt;</span>
+    <span class="kw">&lt;/policy&gt;</span>
+
+<span class="kw">&lt;/busconfig&gt;</span></code></pre></div>
+<div class="sourceCode"><pre class="sourceCode xml"><code class="sourceCode xml"><span class="kw">&lt;?xml</span> version=&quot;1.0&quot;<span class="kw">?&gt;</span> <span class="co">&lt;!--*-nxml-*--&gt;</span>
+<span class="dt">&lt;!DOCTYPE </span>busconfig PUBLIC &quot;-//freedesktop//DTD D-BUS Bus Configuration 1.0//EN&quot;
+&quot;http://www.freedesktop.org/standards/dbus/1.0/busconfig.dtd&quot;<span class="dt">&gt;</span>
+
+<span class="co">&lt;!-- Policy to allow root to own and do everything, and let anyone only access the</span>
+<span class="co">     GetInfo method and the introspectable interface --&gt;</span>
+<span class="kw">&lt;busconfig&gt;</span>
+
+    <span class="kw">&lt;policy</span><span class="ot"> user=</span><span class="st">&quot;root&quot;</span><span class="kw">&gt;</span>
+        <span class="kw">&lt;allow</span><span class="ot"> own=</span><span class="st">&quot;com.example.xyz&quot;</span><span class="kw">/&gt;</span>
+        <span class="kw">&lt;allow</span><span class="ot"> send_interface=</span><span class="st">&quot;com.example.xyz.manager&quot;</span>
+<span class="ot">               send_destination=</span><span class="st">&quot;com.example.xyz&quot;</span><span class="kw">/&gt;</span>
+        <span class="kw">&lt;allow</span><span class="ot"> send_interface=</span><span class="st">&quot;org.freedesktop.DBus.Introspectable&quot;</span>
+<span class="ot">               send_destination=</span><span class="st">&quot;com.example.xyz&quot;</span><span class="kw">/&gt;</span>
+    <span class="kw">&lt;/policy&gt;</span>
+
+    <span class="kw">&lt;policy</span><span class="ot"> context=</span><span class="st">&quot;default&quot;</span><span class="kw">&gt;</span>
+        <span class="kw">&lt;allow</span><span class="ot"> send_interface=</span><span class="st">&quot;com.example.xyz.manager&quot;</span>
+<span class="ot">               send_destination=</span><span class="st">&quot;com.example.xyz&quot;</span>
+<span class="ot">               send_member=</span><span class="st">&quot;GetInfo&quot;</span><span class="kw">/&gt;</span>
+        <span class="kw">&lt;allow</span><span class="ot"> send_interface=</span><span class="st">&quot;org.freedesktop.DBus.Introspectable&quot;</span>
+<span class="ot">               send_destination=</span><span class="st">&quot;com.example.xyz&quot;</span><span class="kw">/&gt;</span>
+    <span class="kw">&lt;/policy&gt;</span>
+
+<span class="kw">&lt;/busconfig&gt;</span></code></pre></div>
+</section>
+</section>
+<section id="auto-starting-d-bus-activation" class="level2">
+<h2>Auto-starting (D-Bus Activation)</h2>
+<p>Auto starting a dbus service only when it is needed is possible. You will need to create both a dbus.service file and a systemd.service file. Take a look in <code>/usr/share/dbus-1/system-services/</code> and <code>/usr/lib/systemd/system/</code></p>
+<p>You will need to enable your systemd service before it will be automatically started by systemd</p>
+<pre><code>sudo systemctl enable my_service.service</code></pre>
+<p>and you have to make sure the dbus.service file points to the systemd service.</p>
+</section>
+</section>
+</body>
+</html>

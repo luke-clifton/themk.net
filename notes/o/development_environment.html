@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <meta name="generator" content="pandoc">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+  <title></title>
+  <style type="text/css">code{white-space: pre;}</style>
+  <!--[if lt IE 9]>
+    <script src="http://html5shim.googlecode.com/svn/trunk/html5.js"></script>
+  <![endif]-->
+  <link rel="stylesheet" href="pandoc.css">
+</head>
+<body>
+<section id="bungarra-development-environment" class="level1">
+<h1>Bungarra Development Environment</h1>
+<blockquote>
+<p>I would recommend this aproach to cross-compilation. It can cause serious pain and madness, as well as a sudden and irretrievable loss of time.</p>
+<p>Just suck it up and emulate fully if that is what you need to do.</p>
+</blockquote>
+<p>The development environment set up is designed to emulate compilation on the actual ARM environment as much as possible. The reasoning behind this is the unfortunate tendency of software writers to not take alternate platforms into consideration, and rarely provide an adequate solution for cross compiling their software.</p>
+<p>To achieve this goal we use proot, a user space implementation of chroot, bind, mount and binfmt_misc. These tools allow us to create a root environment that can use QEMU for emulating an ARM CPU, giving us the capability to run ARM binaries. The bind and mount capabilities allow us to push our native binaries into the environment, allowing us to use a native cross-compiling gcc to provide speed. The fake chroot lets the executables think that they exist within a contained environment.</p>
+<p>The reason why we do not simply compile all software on the Bungarra, or a fully blown ARM virtualised system, is that these environments underperform, or run out of system resources. The reason that our new system does not suffer from this is that we can compile certain often used programs natively, and get the full performance required.</p>
+<section id="setting-up-the-development-environment" class="level2">
+<h2>Setting up the Development Environment</h2>
+<p>Use your systems package manager to install qemu-user, bsdtar, proot, and arm-linux-gnueabi-gcc</p>
+<p>(debian/ubuntu users, there is a seperate repository that you need to enable to get proot)</p>
+<pre><code># apt-get install gcc-arm-linux-gnueabi qemu-user proot bsdtar</code></pre>
+<p>Extract the def-rootfs.tar.bz2 image to where you want it.</p>
+<pre><code>$ mkdir ~/my_dev_env
+$ cd ~/my_dev_env
+$ tar xvf /path/to/def-rootfs.tar.bz2
+$ cd</code></pre>
+<p>Make sure your scripts directory is in your $PATH.</p>
+<p>Take a look at the dev-chroot script and make sure the scripts variable is set up correctly. It should point to the scripts directory in the dev-env svn repository.</p>
+<p>Then you can chroot in with</p>
+<pre><code>$ dev-chroot ~/my_dev_env</code></pre>
+<p>If you need to be a root user in the environment use</p>
+<pre><code>$ dev-chroot ~/my_dev_env -0</code></pre>
+<p>You can now install and build packages.</p>
+<p>You may wish to look into /etc/makepkg.conf to tune some variables. Specific things may be removing the documentation from built packages.</p>
+</section>
+<section id="further-reading" class="level2">
+<h2>Further Reading</h2>
+<p>The Arch Wiki is a useful guide.</p>
+<p>https://wiki.archlinux.org/</p>
+<p>https://wiki.archlinux.org/index.php/ABS https://wiki.archlinux.org/index.php/Pacbuilder</p>
+</section>
+<section id="known-issues-and-workarounds" class="level2">
+<h2>Known Issues and Workarounds</h2>
+<section id="i-need-root-access-but-sudo-does-not-work" class="level3">
+<h3>I need root access, but sudo does not work</h3>
+<p>The sudo program requires that various permission bits and ownerships are set in a particular way. Because this is an unpriviledged setup, these bits are all wrong. If you need to get root access to the system use</p>
+<pre><code>$ dev-chroot ~/my_dev_env -0</code></pre>
+<p>This will make the programs think that you are root, and will usually let you do what you wanted to do.</p>
+</section>
+<section id="permissions-and-security" class="level3">
+<h3>Permissions and security</h3>
+<p>Sometime PKGBUILDS fail in the `check' step, often in tests to do with authentication. Authentication is an issue in the development environment because everything is being faked. Use makepkg with the option --nocheck to prevent this. Tests can be performed on the target at a later date.</p>
+</section>
+<section id="pkgbuild-fails-in-the-package-stage" class="level3">
+<h3>PKGBUILD fails in the package stage</h3>
+<p>PKGBUILDs often install files into the package as particular users. This is especially true for daemon programs (&quot;http&quot; user). By default the root environment uses your systems /etc/passwd which may not contain the same users as is expected by Arch Linux and the PKGBUILDS. To fix this, simply add a user to your system with</p>
+<pre><code># useradd http</code></pre>
+</section>
+<section id="qemu-is-not-perfect." class="level3">
+<h3>Qemu is not perfect.</h3>
+<p>Some applications might not like qemu (bsdtar is one of them). If you need an application to run and qemu is crashing, try using the native version instead.</p>
+<pre><code>$ dev-chroot ~/my_dev_env -b /usr/bin/bsdtar</code></pre>
+<p>This will cause any access to /usr/bin/bsdtar in the environment to go to /usr/bin/bsdtar in the host.</p>
+<p>If you don't want to do it that way, you can also access your host rootfs at /host-rootfs.</p>
+<pre><code>$ /host-rootfs/usr/bin/bsdtar</code></pre>
+</section>
+</section>
+</section>
+</body>
+</html>
