@@ -42,10 +42,21 @@ added one for my historic notes. These also required a new context
 because I didn't have a date for them.
 
 We can now use this package from within `configuration.nix` to set
-up `httpd` to point to our new derivation.
+up `httpd` to point to our new derivation. In order to do this we
+need to determine the sha256 hash of the commit we are interested in.
+To do this, use the command
+
+    nix-prefetch-git <git url> <commit hash>
+
 
 ```nix
-let site = pkgs.callPackage ./themk.net {}
+let
+  sitesrc = pkgs.fetchgit {
+    url = https://github.com/luke-clifton/themk.net.git; 
+    rev = "623f2e60193d0351234df1a3a6a4161badffd668"; 
+    sha256 = "1cb0f50c085ec2d25231992799a29c5d15c4ebae6da8e3ef3cf5abe0f5d80d84"; 
+  }; 
+  site = pkgs.callPackage "${sitesrc}" {}
 in {
   # ...
  
