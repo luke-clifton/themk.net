@@ -1,2 +1,2 @@
-{ nixpkgs ? import <nixpkgs> {}, compiler ? "ghc7102" }:
-nixpkgs.pkgs.haskell.packages.${compiler}.callPackage ./themk.net.nix { }
+{ nixpkgs ? import <nixpkgs> {} }:
+nixpkgs.pkgs.haskellPackages.callPackage ./themk.net.nix { }
