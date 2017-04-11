@@ -1,2 +1,2 @@
 { nixpkgs ? import <nixpkgs> {} }:
-nixpkgs.pkgs.haskellPackages.callPackage ./themk.net.nix { }
+nixpkgs.haskellPackages.callPackage ./themk.net.nix { }
