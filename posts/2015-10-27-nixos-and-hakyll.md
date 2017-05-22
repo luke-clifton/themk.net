@@ -43,7 +43,7 @@ To do this, use the command
 
     nix-prefetch-git <git url> <commit hash>
 
-Here are the relevant parts of my configuration.nix
+Here are the relevant parts of my `configuration.nix`
 
 #### configuration.nix
 ```nix
