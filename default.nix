@@ -1,2 +1,13 @@
 { nixpkgs ? import <nixpkgs> {} }:
-nixpkgs.haskellPackages.callPackage ./themk.net.nix { }
+let
+  builder = nixpkgs.haskellPackages.callPackage ./builder { };
+in
+  nixpkgs.stdenv.mkDerivation {
+    name = "site";
+    src  = ./content;
+    installPhase = ''
+      LANG=C.UTF-8 ${builder}/bin/site build
+      mkdir -p $out
+      cp -a _site/* $out
+    '';
+  }
