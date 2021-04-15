@@ -56,7 +56,7 @@ main = hakyll $ do
             let feedCtx = postCtx `mappend`
                     bodyField "description"
 
-            posts <- recentFirst =<< loadAllSnapshots "posts/*" "content"
+            posts <- fmap (take 10) . recentFirst =<< loadAllSnapshots "posts/*" "content"
             renderAtom feedConfig feedCtx posts
 
 
