@@ -1,10 +1,8 @@
---------------------------------------------------------------------------------
 {-# LANGUAGE OverloadedStrings #-}
 import           Data.Monoid (mappend)
 import           Hakyll
 
 
---------------------------------------------------------------------------------
 main :: IO ()
 main = hakyll $ do
     match "images/*" $ do
@@ -29,6 +27,7 @@ main = hakyll $ do
         route $ setExtension "html"
         compile $ pandocCompiler
             >>= loadAndApplyTemplate "templates/post.html"    postCtx
+            >>= saveSnapshot "content"
             >>= loadAndApplyTemplate "templates/default.html" postCtx
             >>= relativizeUrls
 
@@ -51,8 +50,16 @@ main = hakyll $ do
 
     match "templates/*" $ compile templateCompiler
 
+    create ["atom.xml"] $ do
+        route idRoute
+        compile $ do
+            let feedCtx = postCtx `mappend`
+                    bodyField "description"
 
---------------------------------------------------------------------------------
+            posts <- recentFirst =<< loadAllSnapshots "posts/*" "content"
+            renderAtom feedConfig feedCtx posts
+
+
 postCtx :: Context String
 postCtx =
     dateField "date" "%B %e, %Y" `mappend`
@@ -61,3 +68,13 @@ postCtx =
 historicCtx :: Context String
 historicCtx =
     defaultContext
+
+feedConfig :: FeedConfiguration
+feedConfig = FeedConfiguration
+    { feedTitle       = "blog.themk.net"
+    , feedDescription = "Occasional brain dump"
+    , feedAuthorName  = "Luke"
+    , feedAuthorEmail = "lukec@themk.net"
+    , feedRoot        = "https://blog.themk.net"
+    }
+
