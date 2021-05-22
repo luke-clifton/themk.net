@@ -31,15 +31,23 @@ main = hakyll $ do
             >>= loadAndApplyTemplate "templates/default.html" postCtx
             >>= relativizeUrls
 
+    match "notes/cheatsheet.md" $ do
+        route $ setExtension "html"
+        compile $ pandocCompiler
+            >>= loadAndApplyTemplate "templates/default.html" defaultContext
+            >>= relativizeUrls
+
 
     match "index.html" $ do
         route idRoute
         compile $ do
             posts <- recentFirst =<< loadAll "posts/*"
             historic <- loadAll "notes/historic/*"
+            cheatsheet <- loadAll "notes/cheatsheet.md"
             let indexCtx =
                     listField "posts" postCtx (return posts) `mappend`
                     listField "historic" historicCtx (return historic) `mappend`
+                    listField "cheatsheet" defaultContext (return cheatsheet) `mappend`
                     constField "title" "Home"                `mappend`
                     defaultContext
 

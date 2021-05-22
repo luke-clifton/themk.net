@@ -5,6 +5,13 @@ title: Home
 <h2>Posts</h2>
 $partial("templates/post-list.html")$
 
+<h2>Cheat Sheets</h2>
+Simple things to remember.
+
+$for(cheatsheet)$
+<a href="$url$">$title$</a>
+$endfor$
+
 <h2>Historic Notes</h2>
 
 <p>Old notes that I found lying around. All of them are probably from

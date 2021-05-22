@@ -50,26 +50,26 @@ The following command regesters `qemu-arm-static` as the interpreter for
 any files that contain the specified magic number. This sequence of
 bytes is present in ELF files which target ARM.
 
-~~~
+```
 echo ":qemu-arm-static:M::\x7fELF\x01\x01\x01\x00\x00\x00\x00\x00\x00\x00\x00\x00\x02\x00\x28\x00::/usr/bin/qemu-arm-static:" > /proc/sys/fs/binfmt_misc/register
-~~~
+```
 
 You will also need to register `qemu-arm-static-ld-so` for certain file
 types.
 
-~~~
+```
 echo ":qemu-arm-static-ld-so:M::\x7fELF\x01\x01\x01\x00\x00\x00\x00\x00\x00\x00\x00\x00\x03\x00\x28\x00::/usr/bin/qemu-arm-static:" > /proc/sys/fs/binfmt_misc/register
-~~~
+```
 
 Then make sure that `qemu-arm-static` and friends also exist in your chroot in the correct locations.
 
-~~~
+```
 # This is what I wrote down many years ago. I hope
 # that if I find myself needing to do this again,
 # I will understand what I meant and where to copy things to.
 Copy libc.so.*
 Copy ld-linux-x86-64.*
 Copy /usr/x86-64-unknown-linux-gnu/arm-lin.... *
-~~~
+```
 
 
