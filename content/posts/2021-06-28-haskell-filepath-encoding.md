@@ -109,6 +109,9 @@ to use the functions in
 and provide them with the correct `TextEncoding` (probably the one you
 get when you query
 [`getFileSystemEncoding`](https://hackage.haskell.org/package/base-4.14.0.0/docs/GHC-IO-Encoding.html#v:getFileSystemEncoding)).
+If you know the encoding you want is the file system
+encoding (and not, say, the argv encoding) you can also use
+`System.Posix.ByteString.FilePath.withFilePath` which does it for you.
 
 You can also use `GHC.Foreign` to construct and deconstruct a
 `ByteString` if you are using a library that has made the misguided, but
