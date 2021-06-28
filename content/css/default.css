@@ -3,6 +3,7 @@ body {
     font-size: 16px;
     margin: 0px auto 0px auto;
     width: 600px;
+    line-height: 1.5em;
 }
 
 div#header {
@@ -57,7 +58,7 @@ div.info {
 
 blockquote {
     background: #f8f8f8;
-    border-left: 8px solid #c2c2c2;
+    border-left: 4px solid #c2c2c2;
     margin: 5px 0px;
     padding: 2px 5px;
 }
