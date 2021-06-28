@@ -54,3 +54,10 @@ div.info {
     font-size: 14px;
     font-style: italic;
 }
+
+blockquote {
+    background: #f8f8f8;
+    border-left: 8px solid #c2c2c2;
+    margin: 5px 0px;
+    padding: 2px 5px;
+}
