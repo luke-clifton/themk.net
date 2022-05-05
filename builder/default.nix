@@ -1,4 +1,4 @@
-{ mkDerivation, base, hakyll, stdenv }:
+{ mkDerivation, base, hakyll, lib }:
 mkDerivation {
   pname = "themk-net";
   version = "0.1.0.1";
@@ -6,5 +6,5 @@ mkDerivation {
   isLibrary = false;
   isExecutable = true;
   executableHaskellDepends = [ base hakyll ];
-  license = stdenv.lib.licenses.bsd3;
+  license = lib.licenses.bsd3;
 }
