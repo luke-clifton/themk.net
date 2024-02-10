@@ -74,13 +74,11 @@ Can we "convert" this to codata?
 data CoList a = CoList { getList :: Maybe (a, CoList a) }
 ```
 
-Here, `Nothing` witnesses the `Nil`, and `Just` witnesses the `Cons`. Note
-that we can't just use the `List` definition here like we did above because
-`List` is a recursive type.
+Here, `Nothing` witnesses the `Nil`, and `Just` witnesses the `Cons`.
 
 ## ListT, with Codata
 
-So, now that we have a codata version of `List` (which is the same things
+So, now that we have a codata version of `List` (which is the same thing
 as `List` in Haskell, because data is codata), can we come up with a better
 `ListT`? Sure, we can do the same trivial thing we tried to do with our
 regular `List` definition, just wrap it in the base monad!
