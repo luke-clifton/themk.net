@@ -4,7 +4,7 @@ title: What the Fork!?
 
 *sigh*
 
-What do you do when you want fork a program? What do you think is right?
+What do you do when you want to fork a program? What do you think is right?
 
 ## File Descriptors
 
